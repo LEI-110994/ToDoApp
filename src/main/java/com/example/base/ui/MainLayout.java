@@ -39,6 +39,7 @@ public final class MainLayout extends AppLayout {
         var nav = new SideNav();
         nav.addClassNames(Margin.Horizontal.MEDIUM);
         MenuConfiguration.getMenuEntries().forEach(entry -> nav.addItem(createSideNavItem(entry)));
+        nav.addItem(new SideNavItem("Câmbio de Moedas", "exchange", new Icon(VaadinIcon.MONEY)));
         return nav;
     }
 
