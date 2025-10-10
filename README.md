@@ -2,6 +2,28 @@
 
 - Demonstração Feature - Exchange Rates : https://youtu.be/p9be7uuRi1Y
 
+
+- ## CI/CD Pipeline (GitHub Actions)
+
+Este projeto usa GitHub Actions para compilar automaticamente o ficheiro .jar na branch principal. O ficheiro gerado fica disponível para download como artefacto, e também é copiado para a raiz do repositório.
+
+### Exemplo de build.yml:
+```
+name: Build with Maven
+run: mvn clean package -DskipTests
+
+name: Copy JAR to root
+run: cp target/*.jar ./app.jar
+
+name: Upload JAR artifact
+uses: actions/upload-artifact@v4
+with:
+name: todoapp-jar
+path: app.jar
+
+text
+undefined
+```
 ## Project Structure
 
 The sources of your App have the following structure:
