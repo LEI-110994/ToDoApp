@@ -1,6 +1,6 @@
 # App README
 
-- [ ] TODO Replace or update this README with instructions relevant to your application
+- Demonstração Feature - Exchange Rates : https://youtu.be/p9be7uuRi1Y
 
 ## Project Structure
 
