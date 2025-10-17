@@ -1,4 +1,4 @@
-package com.example.todoapp.views;
+/*package com.example.todoapp.views;
 
 import com.example.todoapp.util.EmailService;
 import com.vaadin.flow.component.button.Button;
@@ -36,5 +36,4 @@ public class EmailView extends VerticalLayout {
 
         add(destinatario, assunto, corpo, enviar);
     }
-}
-
+}*/

@@ -13,13 +13,12 @@ public class EmailService {
 
     public void sendSimpleEmail(String to, String subject, String text) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
+        message.setFrom("ToDoAppESLEI2025@outlook.pt"); // remetente fixo
+        message.setTo(to);                              // destinatário definido pelo utilizador
         message.setSubject(subject);
         message.setText(text);
-        message.setFrom("teu.email@gmail.com"); // opcional, mas recomendado
 
         mailSender.send(message);
-        System.out.println("Email enviado com sucesso para " + to);
+        System.out.println("✅ Email enviado para " + to);
     }
 }
-

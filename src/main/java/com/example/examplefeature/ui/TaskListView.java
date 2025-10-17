@@ -3,18 +3,23 @@ package com.example.examplefeature.ui;
 import com.example.base.ui.component.ViewToolbar;
 import com.example.examplefeature.Task;
 import com.example.examplefeature.TaskService;
+import com.example.todoapp.util.EmailService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -35,8 +40,15 @@ class TaskListView extends Main {
     final Button createBtn;
     final Grid<Task> taskGrid;
 
+    @Autowired
+    private EmailService emailService;
+
     TaskListView(TaskService taskService) {
         this.taskService = taskService;
+
+        // ========================
+        // Secção 1: Tarefas (original)
+        // ========================
 
         description = new TextField();
         description.setPlaceholder("What do you want to do?");
@@ -69,6 +81,37 @@ class TaskListView extends Main {
 
         add(new ViewToolbar("Task List", ViewToolbar.group(description, dueDate, createBtn)));
         add(taskGrid);
+
+        // ========================
+        // Secção 2: Envio de Emails (importada da EmailView)
+        // ========================
+
+        H2 emailHeader = new H2("Enviar Email");
+        TextField destinatario = new TextField("Destinatário");
+        TextField assunto = new TextField("Assunto");
+        TextArea corpo = new TextArea("Mensagem");
+        corpo.setWidthFull();
+
+        Button enviar = new Button("Enviar Email", e -> {
+            try {
+                emailService.sendSimpleEmail(
+                        destinatario.getValue(),
+                        assunto.getValue(),
+                        corpo.getValue()
+                );
+                Notification.show("Email enviado com sucesso!", 4000, Notification.Position.MIDDLE);
+            } catch (Exception ex) {
+                Notification.show("Erro ao enviar email: " + ex.getMessage(),
+                        5000, Notification.Position.MIDDLE);
+            }
+        });
+        enviar.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+
+        VerticalLayout emailLayout = new VerticalLayout(emailHeader, destinatario, assunto, corpo, enviar);
+        emailLayout.addClassNames(LumoUtility.Margin.Top.LARGE);
+        emailLayout.setWidthFull();
+
+        add(emailLayout);
     }
 
     private void createTask() {
