@@ -30,7 +30,12 @@ public class TaskService {
 
     @Transactional(readOnly = true)
     public List<Task> list(Pageable pageable) {
-        return taskRepository.findAllBy(pageable).toList();
+        return taskRepository.findAll(pageable).getContent();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Task> findAll() {
+        return taskRepository.findAll();
     }
 
 }
