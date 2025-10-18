@@ -1,6 +1,7 @@
 # App README
 
 - Demonstração Feature - Exchange Rates : https://youtu.be/p9be7uuRi1Y
+- Demonstração Feature - Pdf Feature : https://youtu.be/J_Vnu7fXou4
 
 
 - ## CI/CD Pipeline (GitHub Actions)
