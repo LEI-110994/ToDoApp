@@ -1,6 +1,7 @@
 # App README
 
 - Demonstração Feature - Exchange Rates : https://youtu.be/p9be7uuRi1Y
+- Demonstração Feature - QRCode Generator : https://youtu.be/x-fFL2mtAIU
 
 
 - ## CI/CD Pipeline (GitHub Actions)
