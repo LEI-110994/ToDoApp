@@ -4,10 +4,12 @@ import com.example.base.ui.component.ViewToolbar;
 import com.example.examplefeature.Task;
 import com.example.examplefeature.TaskService;
 import com.example.todoapp.util.EmailService;
+import com.example.todoapp.util.PdfService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.notification.Notification;
@@ -18,12 +20,17 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.InputStreamFactory;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.Base64;
+import java.util.List;
 import java.util.Optional;
 
 import static com.vaadin.flow.spring.data.VaadinSpringDataHelpers.toSpringPageRequest;
@@ -42,6 +49,9 @@ class TaskListView extends Main {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private PdfService pdfService;
 
     TaskListView(TaskService taskService) {
         this.taskService = taskService;
@@ -63,6 +73,10 @@ class TaskListView extends Main {
         createBtn = new Button("Create", event -> createTask());
         createBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
+        // Botão para exportar PDF
+        Button exportPdfBtn = new Button("Exportar PDF", event -> exportToPdf());
+        exportPdfBtn.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+
         var dateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM).withLocale(getLocale())
                 .withZone(ZoneId.systemDefault());
         var dateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(getLocale());
@@ -79,7 +93,7 @@ class TaskListView extends Main {
         addClassNames(LumoUtility.BoxSizing.BORDER, LumoUtility.Display.FLEX, LumoUtility.FlexDirection.COLUMN,
                 LumoUtility.Padding.MEDIUM, LumoUtility.Gap.SMALL);
 
-        add(new ViewToolbar("Task List", ViewToolbar.group(description, dueDate, createBtn)));
+        add(new ViewToolbar("Task List", ViewToolbar.group(description, dueDate, createBtn, exportPdfBtn)));
         add(taskGrid);
 
         // ========================
@@ -121,6 +135,50 @@ class TaskListView extends Main {
         dueDate.clear();
         Notification.show("Task added", 3000, Notification.Position.BOTTOM_END)
                 .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+    }
+
+
+    private void exportToPdf() {
+        try {
+            // Obter todas as tarefas
+            List<Task> tasks = taskService.findAll();
+
+            if (tasks.isEmpty()) {
+                Notification.show("Não há tarefas para exportar!", 3000, Notification.Position.MIDDLE)
+                        .addThemeVariants(NotificationVariant.LUMO_WARNING);
+                return;
+            }
+
+            // Gerar PDF
+            ByteArrayOutputStream pdfStream = pdfService.generateTaskListPdf(tasks);
+            byte[] pdfBytes = pdfStream.toByteArray();
+
+            // Converter para Base64
+            String base64Pdf = Base64.getEncoder().encodeToString(pdfBytes);
+
+            // Criar Blob e abrir em nova aba usando JavaScript
+            getElement().executeJs(
+                    "const byteCharacters = atob($0);" +
+                            "const byteNumbers = new Array(byteCharacters.length);" +
+                            "for (let i = 0; i < byteCharacters.length; i++) {" +
+                            "    byteNumbers[i] = byteCharacters.charCodeAt(i);" +
+                            "}" +
+                            "const byteArray = new Uint8Array(byteNumbers);" +
+                            "const blob = new Blob([byteArray], {type: 'application/pdf'});" +
+                            "const url = URL.createObjectURL(blob);" +
+                            "window.open(url, '_blank');" +
+                            "setTimeout(() => URL.revokeObjectURL(url), 100);",
+                    base64Pdf
+            );
+
+            Notification.show("PDF gerado com sucesso!", 3000, Notification.Position.BOTTOM_END)
+                    .addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+
+        } catch (Exception e) {
+            Notification.show("Erro ao gerar PDF: " + e.getMessage(), 5000, Notification.Position.MIDDLE)
+                    .addThemeVariants(NotificationVariant.LUMO_ERROR);
+            e.printStackTrace();
+        }
     }
 
 }
